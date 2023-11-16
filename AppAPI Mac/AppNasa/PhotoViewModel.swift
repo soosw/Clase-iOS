@@ -1,0 +1,49 @@
+//
+//  PhotoViewModel.swift
+//  AppNasa
+//
+//  Created by Alumno on 22/09/23.
+//
+
+import Foundation
+import SwiftUI
+
+class PhotoViewModel : ObservableObject {
+    @Published var arrPhotos = [PhotoModel]()
+    
+
+    
+    func getPhotoData() async throws{
+        //1. Obtener el objeto URL
+        
+        guard let url = URL(string: "http://10.22.148.143:3000/Competencias")
+        else{
+                print("invalid url")
+                return
+                }
+        
+        //2. Preparar el request a la pagina http con la URL
+        let urlRequest = URLRequest(url: url)
+        
+        //3. Realizar la llamada con URLSession
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else{
+            print("error url")
+            return
+        }
+        
+        //4. Decodificar la informacion de formato JSON
+        let results = try JSONDecoder().decode([PhotoModel].self, from: data)
+        
+        //print (results)
+        
+        //5. Utilizamos el thread principal para actualizar la variable de Photos
+        DispatchQueue.main.async {
+            self.arrPhotos = results
+        }
+        
+        
+        
+    }
+}
